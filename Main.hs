@@ -29,7 +29,7 @@
 --     , selectedCell = (0, 0) -- Celda seleccionada inicial.
 --     , message = ""          -- Sin mensaje al inicio.
 --     , isWin = False         -- Juego no ganado al inicio.
---     , images = [("startTitle", startTitle)]
+--     , images = [("startTitle", startTitle), ("winTitle", winTitle), ("schoolLogo", schoolLogo)]
 -- }
 
 -- -- Actualización del estado (para este juego, no hacemos nada en cada frame).
@@ -41,6 +41,8 @@
 -- main = do
 --     -- Cargar imágenes del juego
 --     startTitle <- loadBMP "./title.bmp"
+--     winTitle <- loadBMP "./win.bmp"
+--     schoolLogo <- loadBMP "./matcom.bmp"
 --     -- Genera un tablero inicial válido (debe implementarse en Logic/Board.hs).
 --     initialBoard <- generateBoard
 --     let stateWithBoard = initialState { board = initialBoard, initialBoard = initialBoard }

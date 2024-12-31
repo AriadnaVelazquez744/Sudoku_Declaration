@@ -34,7 +34,7 @@ drawButton cfg x y label isHighlighted =
           , color baseColor $
             roundedRectangle (buttonWidth cfg - 10) (buttonHeight cfg - 10) (buttonRadius cfg)
           , translate textXOffset textYOffset $
-            styledText textScale (buttonTextColor cfg) label
+            styledText textScale 0.8 (buttonTextColor cfg) label
           ]
 
 -- Botón ovalado con bordes suaves
@@ -52,9 +52,9 @@ roundedRectangle width height radius =
          ]
 
 -- Dibuja texto grueso e intenso
-styledText :: Float -> Color -> String -> Picture
-styledText scaleSize textColor txt =
-    let offset = 0.8 -- Ajuste del grosor simulado
+styledText :: Float -> Float -> Color -> String -> Picture
+styledText scaleSize scaleThickness textColor txt =
+    let offset = scaleThickness -- Ajuste del grosor simulado
         baseText = scale scaleSize scaleSize $ text txt
     in pictures
          [ translate dx dy $ color textColor baseText
