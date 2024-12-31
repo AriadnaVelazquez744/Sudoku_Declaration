@@ -11,7 +11,7 @@
 -- window :: Display
 -- window = InWindow "Sudoku" (1670, 850) (100, 100)
 
---lighterLila = makeColorI 245 235 255 255 -- Tonalidad más clara de violeta
+-- lighterLila = makeColorI 245 235 255 255 -- Tonalidad más clara de violeta
 
 -- backgroundColor :: Color
 -- backgroundColor = white
@@ -29,7 +29,13 @@
 --     , selectedCell = (0, 0) -- Celda seleccionada inicial.
 --     , message = ""          -- Sin mensaje al inicio.
 --     , isWin = False         -- Juego no ganado al inicio.
---     , images = [("startTitle", startTitle), ("winTitle", winTitle), ("schoolLogo", schoolLogo)]
+--     , images = 
+        --   [
+        --     ("startTitle", startTitle), 
+        --     ("winTitle", winTitle), 
+        --     ("schoolLogo", schoolLogo), 
+        --     ("sudokuElements", sudokuElements)
+        --   ]
 -- }
 
 -- -- Actualización del estado (para este juego, no hacemos nada en cada frame).
@@ -39,13 +45,17 @@
 -- -- Función principal
 -- main :: IO ()
 -- main = do
+    
 --     -- Cargar imágenes del juego
 --     startTitle <- loadBMP "./title.bmp"
 --     winTitle <- loadBMP "./win.bmp"
 --     schoolLogo <- loadBMP "./matcom.bmp"
+--     sudokuElements <- loadBMP "./elements.bmp"
+
 --     -- Genera un tablero inicial válido (debe implementarse en Logic/Board.hs).
 --     initialBoard <- generateBoard
 --     let stateWithBoard = initialState { board = initialBoard, initialBoard = initialBoard }
+
 --     play 
 --         window 
 --         backgroundColor 

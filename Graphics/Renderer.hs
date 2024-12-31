@@ -11,12 +11,13 @@ render state = case screen state of
     StartScreen   -> drawStartScreen state
     GameScreen    -> drawGameScreen state
     CreditsScreen -> drawCreditsScreen state
-    -- RulesScreen   -> drawRulesScreen
+    RulesScreen   -> drawRulesScreen state
     EndScreen     -> drawEndScreen state
 
 lightLila = makeColorI 230 210 255 255
 lighterLila = makeColorI 245 235 255 255
 darkViolet = makeColorI 25 0 68 255
+borde = makeColorI 116 66 201 255
     
 -- Pantalla de inicio
 drawStartScreen :: GameState -> Picture
@@ -26,7 +27,7 @@ drawStartScreen state =
       [ 
         renderImage title (0) 130 2.45 2.45, -- Imagen centrada y escalada
         drawButton startButtonConfig (-500) (-250) " Credits " False,
-        drawButton startPlayButtonConfig (0) (-280) " Play " False,
+        drawButton startPlayButtonConfig (0) (-280) " Play " False,     --los espacios son para poder centrar la imagen
         drawButton startButtonConfig (450) (-250) " Rules " False
       ]
     
@@ -43,7 +44,6 @@ drawGameScreen state =
             (7.40 * cellSize) -- offsetY del tablero
             cellSize,
         gameMessage (message state),
-        -- pictures [drawButton gameButtonConfig x y label False | (x, y, label) <- buttonPositions]
         drawButton gameButtonConfig (-575) (150) "Back" False,
         drawButton gameButtonConfig (-575) (50) "New Game  " False,
         drawButton gameButtonConfig (-575) (-50) "Clear Board" False
@@ -56,7 +56,7 @@ drawEndScreen state =
     in pictures
       [  
         color darkViolet $ rectangleSolid 2500 1500, -- Fondo de color personalizado
-        renderImage win (150) 0 0.9 0.9, -- Imagen centrada y escalada
+        renderImage win (150) (0) 0.9 0.9, -- Imagen centrada y escalada
         drawButton endButtonConfig (-570) (-150) "Go to Start" False,
         drawButton endButtonConfig (-570) (150) "New Game  " False
       ]
@@ -74,10 +74,29 @@ drawCreditsScreen state =
         translate (-700) (-20) $ styledText 0.18 0.5 black "Ariadna Velazquez Rey  C311 ",
         translate (-700) (-60) $ styledText 0.18 0.5 black "Lia Stephany Lopez Rozales  C312 ",
         translate (-700) (-100) $ styledText 0.18 0.5 black "Raidel Miguel Cabellud Lizaso   C311 ",
-
         drawButton gameButtonConfig (0) (-290) "Back" False
       ]
 
+-- Pantalla de reglas
+drawRulesScreen :: GameState -> Picture
+drawRulesScreen state = 
+    let elements = getImage "sudokuElements" (images state)
+        rulesText = 
+          [ 
+            "1. Fill the empty block with a single number from 1 to 9.",
+            "2. Numbers cannot be repeated in the same row.",
+            "3. Numbers cannot be repeated in the same column.",
+            "4. Numbers cannot be repeated in the same square.",
+            "5. Each Sudoku puzzle has a unique solution.",
+            "6. Have fun and challenge your mind!"
+          ]
+    in pictures
+      [ 
+        renderImage elements (500) (0) 1.0 1.0, -- Imagen centrada y escalada
+        translate (-150) 250 $ styledText 1.0 1.0 borde "Rules",
+        renderTextBlock (-650, 100) 50 black 0.20 0.5 rulesText, -- Bloque de texto
+        drawButton gameButtonConfig (0) (-290) "Back" False
+      ]
 
 -- Dibuja un mensaje con estilo
 drawMessage :: Float -> Float -> Float -> Color -> String -> Picture
@@ -99,6 +118,11 @@ getImage name imgs = case lookup name imgs of
 renderImage :: Picture -> Float -> Float -> Float -> Float -> Picture
 renderImage img x y scaleX scaleY =
     translate x y $ scale scaleX scaleY img
+
+-- Función para renderizar varias líneas de texto
+renderTextBlock :: (Float, Float) -> Float -> Color -> Float -> Float -> [String] -> Picture
+renderTextBlock (startX, startY) lineSpacing color scaleSize scaleThickness lines =
+    pictures $ zipWith (\i line -> translate startX (startY - i * lineSpacing) $ styledText scaleSize scaleThickness color line) [0..] lines
     
 -- Configuración de botones para la pantalla de inicio
 startButtonConfig :: ButtonConfig
@@ -124,7 +148,6 @@ startPlayButtonConfig = ButtonConfig
   , buttonTextScale = 0.38
   }
 
--- Configuración específica para los botones de la pantalla de juego
 gameButtonConfig :: ButtonConfig
 gameButtonConfig = ButtonConfig
   { buttonWidth = 250
@@ -135,8 +158,6 @@ gameButtonConfig = ButtonConfig
   , buttonTextColor = black
   , buttonTextScale = 0.25
   }
-
-borde = makeColorI 116 66 201 255
 
 endButtonConfig :: ButtonConfig
 endButtonConfig = ButtonConfig
@@ -149,19 +170,3 @@ endButtonConfig = ButtonConfig
   , buttonTextColor = black
   , buttonTextScale = 0.36
   }
-  
-
-
-
-
-
-
--- Pantalla de reglas
--- drawRulesScreen :: Picture
--- drawRulesScreen = pictures
---   [ 
---     translate (-200) 200 $ scale 0.2 0.2 $ color blue $ text "Reglas",
---     translate (-250) 100 $ scale 0.1 0.1 $ text "Completa el tablero sin repetir números por fila, columna y subcuadrante.",
---     drawButton (-100) (-100) "Volver"
---   ]
-
