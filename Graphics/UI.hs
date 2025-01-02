@@ -26,7 +26,7 @@ drawButton cfg x y label isHighlighted =
         textXOffset = -textWidth / 2-- Centrar texto horizontalmente
         textYOffset = -(buttonHeight cfg) / 4 -- Centrar texto verticalmente
     in translate x y $
-       pictures
+      pictures
           [ 
             translate 5 (-5) $
             color (dark baseColor) $
@@ -43,13 +43,13 @@ roundedRectangle width height radius =
     let halfWidth = width / 2
         halfHeight = height / 2
     in pictures
-         [ translate (-halfWidth + radius) (-halfHeight + radius) $ circleSolid radius
-         , translate (halfWidth - radius) (-halfHeight + radius) $ circleSolid radius
-         , translate (-halfWidth + radius) (halfHeight - radius) $ circleSolid radius
-         , translate (halfWidth - radius) (halfHeight - radius) $ circleSolid radius
-         , rectangleSolid (width - 2 * radius) height
-         , rectangleSolid width (height - 2 * radius)
-         ]
+        [ translate (-halfWidth + radius) (-halfHeight + radius) $ circleSolid radius
+        , translate (halfWidth - radius) (-halfHeight + radius) $ circleSolid radius
+        , translate (-halfWidth + radius) (halfHeight - radius) $ circleSolid radius
+        , translate (halfWidth - radius) (halfHeight - radius) $ circleSolid radius
+        , rectangleSolid (width - 2 * radius) height
+        , rectangleSolid width (height - 2 * radius)
+        ]
 
 -- Dibuja texto grueso e intenso
 styledText :: Float -> Float -> Color -> String -> Picture
@@ -57,10 +57,10 @@ styledText scaleSize scaleThickness textColor txt =
     let offset = scaleThickness -- Ajuste del grosor simulado
         baseText = scale scaleSize scaleSize $ text txt
     in pictures
-         [ translate dx dy $ color textColor baseText
-         | dx <- [-offset, 0, offset]
-         , dy <- [-offset, 0, offset]
-         ]
+        [ translate dx dy $ color textColor baseText
+        | dx <- [-offset, 0, offset]
+        , dy <- [-offset, 0, offset]
+        ]
 
 -- Verifica si un botón fue clicado.
 isButtonClicked :: Float -> Float -> Float -> Float -> Bool

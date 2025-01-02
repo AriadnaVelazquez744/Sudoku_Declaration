@@ -17,10 +17,10 @@ drawBoard currentBoard initialBoard selectedCell =
   let boardOffsetX = -3 * cellSize  -- Centrar en X
       boardOffsetY = 3.92 * cellSize  -- Centrar en Y
   in translate boardOffsetX boardOffsetY $ pictures
-       [ drawCell x y val (cellStyle (x, y) selectedCell initialBoard)
-       | (y, row) <- zip [0..] currentBoard
-       , (x, val) <- zip [0..] row
-       ]
+      [ drawCell x y val (cellStyle (x, y) selectedCell initialBoard)
+      | (y, row) <- zip [0..] currentBoard
+      , (x, val) <- zip [0..] row
+      ]
 
 -- Dibuja una casilla individual con su estilo.
 drawCell :: Int -> Int -> Maybe Int -> Color -> Picture
