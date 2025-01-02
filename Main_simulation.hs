@@ -3,6 +3,7 @@ module Main where
 import Graphics.Gloss
 import Graphics.Renderer (render)
 import Common
+import Events (handleEvent)
 
 -- Configuración de la ventana para pruebas gráficas
 window :: Display
@@ -94,26 +95,26 @@ fps = 60
 -- -- Prueba pantalla de victoria
 -- main :: IO ()
 -- main = do
---     winTitle <- loadBMP "./win.bmp"
+--       winTitle <- loadBMP "./win.bmp"
 
---     let initialState = GameState
---           { screen = EndScreen
---           , board = replicate 9 (replicate 9 Nothing)
---           , initialBoard = replicate 9 (replicate 9 Nothing)
---           , selectedCell = (0, 0)
---           , message = ""
---           , isWin = False
---           , images = [("winTitle", winTitle)]
---           }
+--       let initialState = GameState
+--             { screen = EndScreen
+--             , board = replicate 9 (replicate 9 Nothing)
+--             , initialBoard = replicate 9 (replicate 9 Nothing)
+--             , selectedCell = (0, 0)
+--             , message = ""
+--             , isWin = False
+--             , images = [("winTitle", winTitle)]
+--             }
 
---     play
---       window
---       backgroundColor
---       fps
---       initialState
---       render
---       (\_ state -> state)
---       (\_ state -> state)
+--       play
+--             window
+--             backgroundColor
+--             fps
+--             initialState
+--             render
+--             (\_ state -> state)
+--             (\_ state -> state)
 
 
 -- -- Prueba pantalla de créditos
@@ -142,27 +143,52 @@ fps = 60
 
 
 
+-- -- Prueba pantalla de reglas
+-- main :: IO ()
+-- main = do
+-- sudokuElements <- loadBMP "./elements.bmp"
+
+-- let initialState = GameState
+--       { screen = RulesScreen
+--       , board = replicate 9 (replicate 9 Nothing)
+--       , initialBoard = replicate 9 (replicate 9 Nothing)
+--       , selectedCell = (0, 0)
+--       , message = ""
+--       , isWin = False
+--       , images = [("sudokuElements", sudokuElements)]
+--       }
+
+-- play
+--       window
+--       backgroundColor
+--       fps
+--       initialState
+--       render
+--       (\_ state -> state)
+--       (\_ state -> state)
+
+
 -- Prueba pantalla de reglas
 main :: IO ()
 main = do
-    sudokuElements <- loadBMP "./elements.bmp"
+      sudokuElements <- loadBMP "./elements.bmp"
 
-    let initialState = GameState
-          { screen = RulesScreen
-          , board = replicate 9 (replicate 9 Nothing)
-          , initialBoard = replicate 9 (replicate 9 Nothing)
-          , selectedCell = (0, 0)
-          , message = ""
-          , isWin = False
-          , images = [("sudokuElements", sudokuElements)]
-          }
+      let initialState = GameState
+            { screen = StartScreen  -- Pantalla inicial para pruebas
+            , board = replicate 9 (replicate 9 Nothing)
+            , initialBoard = replicate 9 (replicate 9 Nothing)
+            , selectedCell = (0, 0)
+            , message = ""
+            , isWin = False
+            , images = [("sudokuElements", sudokuElements)]
+            }
 
-    play
-      window
-      backgroundColor
-      fps
-      initialState
-      render
-      (\_ state -> state)
-      (\_ state -> state)
+      play
+            window
+            backgroundColor
+            fps
+            initialState
+            render
+            handleEvent  -- Maneja eventos
+            (\_ state -> state) -- Sin actualizaciones en cada frame
 
