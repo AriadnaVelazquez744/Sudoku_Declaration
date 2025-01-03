@@ -36,6 +36,7 @@ updateBoard :: Board -> Int -> Int -> Maybe Int -> Board
 updateBoard b x y val =
     take y b ++ [take x (b !! y) ++ [val] ++ drop (x + 1) (b !! y)] ++ drop (y + 1) b
 
+
 -- Detecta si un clic ocurre dentro del área del tablero
 isCellClicked :: Float -> Float -> Bool
 isCellClicked mx my =
@@ -61,3 +62,16 @@ selectCell mx my state =
     boardHeight = 9 * cellSize
     boardOffsetX = -boardWidth / 2
     boardOffsetY = boardHeight / 2
+
+deleteValue :: GameState -> GameState
+deleteValue state =
+    let (x, y) = selectedCell state
+        initial = initialBoard state !! y !! x
+        current = board state !! y !! x
+    in if initial == Nothing && current /= Nothing -- Solo elimina si no es parte del tablero inicial y hay un valor
+            then state { board = updateBoard (board state) x y Nothing }
+            else state { message = "No puedes modificar esta casilla." }
+
+
+
+

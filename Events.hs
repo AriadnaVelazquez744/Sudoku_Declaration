@@ -2,6 +2,7 @@ module Events where
 import Common 
 import Graphics.Gloss.Interface.Pure.Game
 import EventHelpers
+import Debug.Trace
 
 
 handleEvent :: Event -> GameState -> GameState
@@ -40,10 +41,11 @@ handleGameScreen (EventKey (SpecialKey KeyUp) Down _ _) state =
 handleGameScreen (EventKey (SpecialKey KeyDown) Down _ _) state =
     state { selectedCell = moveSelection (0, 1) (selectedCell state) }
 
--- Insertar un valor en la celda seleccionada
+-- Insertar un valor o eliminar el valor de la celda seleccionada
 handleGameScreen (EventKey (Char c) Down _ _) state
-    | c >= '1' && c <= '9' = insertValue (read [c]) state
-    | otherwise = state
+    | c >= '1' && c <= '9' = insertValue (read [c]) state 
+    | c == '\b'            = deleteValue state           
+    | otherwise            = state                       
 
 -- Ignorar otros eventos
 handleGameScreen _ state = state
