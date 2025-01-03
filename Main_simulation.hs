@@ -3,7 +3,7 @@ module Main where
 import Graphics.Gloss
 import Graphics.Renderer (render)
 import Common
-import Events (handleEvent)
+import Events.Events (handleEvent)
 
 -- Configuración de la ventana para pruebas gráficas
 window :: Display

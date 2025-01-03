@@ -4,7 +4,7 @@
 -- import Graphics.Gloss.Interface.Pure.Game
 -- import Common
 -- import Graphics.Renderer (render)
--- import Events (handleEvent)
+-- import Events.Events (handleEvent)
 -- import Logic (generateBoard)
 
 -- -- Configuración de la ventana principal
