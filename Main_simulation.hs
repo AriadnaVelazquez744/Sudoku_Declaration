@@ -1,7 +1,7 @@
 module Main where
 
 import Graphics.Gloss
-import Graphics.Renderer (render)
+import Views.Renderer (render)
 import Common
 import Events.Events (handleEvent)
 

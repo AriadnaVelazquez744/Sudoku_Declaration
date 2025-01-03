@@ -3,7 +3,7 @@
 -- import Graphics.Gloss
 -- import Graphics.Gloss.Interface.Pure.Game
 -- import Common
--- import Graphics.Renderer (render)
+-- import Views.Renderer (render)
 -- import Events.Events (handleEvent)
 -- import Logic (generateBoard)
 
