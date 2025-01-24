@@ -64,6 +64,7 @@ generateSolutionSteps initialState = solve (board initialState) []
               let newBoard = updateBoard board (r, c) (Just v)
               solve newBoard (steps ++ [step])
 
+
 -- Actualiza el valor en una celda específica del tablero
 updateBoard :: Board -> (Int, Int) -> Maybe Int -> Board
 updateBoard board (row, col) val =
@@ -92,15 +93,6 @@ getBox (row, col) board =
   let boxRow = (row `div` 3) * 3
       boxCol = (col `div` 3) * 3
   in catMaybes [board !! r !! c | r <- [boxRow..boxRow+2], c <- [boxCol..boxCol+2]]
-
-
-
-
-
-
-
-
-
 
 -- Verifica si un número puede colocarse en una celda
 isValidMove :: Board -> Int -> (Int, Int) -> Bool

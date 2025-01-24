@@ -21,6 +21,7 @@ data GameState = GameState
   , message :: String          -- Mensaje para el usuario.
   , isWin :: Bool              -- Indicador de victoria.
   , images :: [(String, Picture)] -- Lista de imágenes cargadas
+  , autoSolveRunning :: Bool
   }
 
 -- Matriz del tablero, donde Nothing es una celda vacía.
