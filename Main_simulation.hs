@@ -175,8 +175,30 @@ main = do
 
       let initialState = GameState
             { screen = StartScreen  -- Pantalla inicial para pruebas
-            , board = replicate 9 (replicate 9 Nothing)
-            , initialBoard = replicate 9 (replicate 9 Nothing)
+            , board = 
+                  [ 
+                  [Just 5, Nothing, Nothing, Nothing, Just 7, Nothing, Nothing, Nothing, Just 3]
+                  , [Nothing, Nothing, Nothing, Just 1, Nothing, Just 9, Nothing, Nothing, Nothing]
+                  , [Nothing, Just 8, Nothing, Nothing, Nothing, Nothing, Nothing, Just 6, Nothing]
+                  , [Just 1, Nothing, Just 7, Nothing, Nothing, Nothing, Just 4, Nothing, Nothing]
+                  , [Nothing, Just 2, Nothing, Nothing, Just 5, Nothing, Nothing, Just 8, Nothing]
+                  , [Nothing, Nothing, Just 6, Nothing, Nothing, Nothing, Just 9, Nothing, Just 1]
+                  , [Nothing, Just 3, Nothing, Nothing, Nothing, Nothing, Nothing, Just 7, Nothing]
+                  , [Nothing, Nothing, Nothing, Just 6, Nothing, Just 2, Nothing, Nothing, Nothing]
+                  , [Just 4, Nothing, Nothing, Nothing, Just 8, Nothing, Nothing, Nothing, Just 9]
+                  ] 
+            , initialBoard = 
+                  [ 
+                    [Just 5, Nothing, Nothing, Nothing, Just 7, Nothing, Nothing, Nothing, Just 3]
+                  , [Nothing, Nothing, Nothing, Just 1, Nothing, Just 9, Nothing, Nothing, Nothing]
+                  , [Nothing, Just 8, Nothing, Nothing, Nothing, Nothing, Nothing, Just 6, Nothing]
+                  , [Just 1, Nothing, Just 7, Nothing, Nothing, Nothing, Just 4, Nothing, Nothing]
+                  , [Nothing, Just 2, Nothing, Nothing, Just 5, Nothing, Nothing, Just 8, Nothing]
+                  , [Nothing, Nothing, Just 6, Nothing, Nothing, Nothing, Just 9, Nothing, Just 1]
+                  , [Nothing, Just 3, Nothing, Nothing, Nothing, Nothing, Nothing, Just 7, Nothing]
+                  , [Nothing, Nothing, Nothing, Just 6, Nothing, Just 2, Nothing, Nothing, Nothing]
+                  , [Just 4, Nothing, Nothing, Nothing, Just 8, Nothing, Nothing, Nothing, Just 9]
+                  ]
             , selectedCell = (0, 0)
             , message = ""
             , isWin = False

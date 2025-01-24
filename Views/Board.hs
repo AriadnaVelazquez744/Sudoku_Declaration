@@ -52,7 +52,7 @@ lightLila = makeColorI 230 210 255 255
 cellStyle :: (Int, Int) -> (Int, Int) -> Board -> Color
 cellStyle (x, y) (selX, selY) initialBoard
     | (x, y) == (selX, selY) && initialBoard !! y !! x == Nothing = lightLila -- Gris claro si es seleccionada y no es inicial.
-    | initialBoard !! y !! x /= Nothing = greyN 0.7                           -- Gris oscuro para las celdas iniciales.
+    | initialBoard !! y !! x /= Nothing = greyN 0.85                           -- Gris oscuro para las celdas iniciales.
     | otherwise = white                                                       -- Blanco para celdas vacías.
 
 

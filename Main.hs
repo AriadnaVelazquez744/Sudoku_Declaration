@@ -5,7 +5,7 @@
 -- import Common
 -- import Views.Renderer (render)
 -- import Events.Events (handleEvent)
--- import Logic (generateBoard)
+-- import Logic.Logic (generateBoard)
 
 -- -- Configuración de la ventana principal
 -- window :: Display
@@ -14,7 +14,7 @@
 -- lighterLila = makeColorI 245 235 255 255 -- Tonalidad más clara de violeta
 
 -- backgroundColor :: Color
--- backgroundColor = white
+-- backgroundColor = lighterLila
 
 -- fps :: Int
 -- fps = 60

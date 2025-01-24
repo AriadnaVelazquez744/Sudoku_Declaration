@@ -44,9 +44,11 @@ drawGameScreen state =
             (7.40 * cellSize) -- offsetY del tablero
             cellSize,
         gameMessage (message state),
-        drawButton gameButtonConfig (-575) (150) "Back" False,
-        drawButton gameButtonConfig (-575) (50) "New Game  " False,
-        drawButton gameButtonConfig (-575) (-50) "Clear Board" False
+        drawButton gameButtonConfig (-575) (300) "Back" False,
+        drawButton gameButtonConfig (-575) (200) "New Game  " False,
+        drawButton gameButtonConfig (-575) (100) "Clear Board" False,
+        drawButton gameButtonConfig (-575) (0) " AutoSolve " False,
+        drawButton gameButtonConfig (-575) (-100) " Stop Solving " False
       ]
 
 -- Pantalla de fin del juego
