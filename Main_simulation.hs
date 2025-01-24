@@ -203,6 +203,7 @@ main = do
             , message = ""
             , isWin = False
             , images = [("sudokuElements", sudokuElements)]
+            , autoSolveRunning = False
             }
 
       play

@@ -3,6 +3,8 @@ module Events.Events where
 import Common 
 import Graphics.Gloss.Interface.Pure.Game
 import Events.EventHelpers
+import Logic.CSP (generateSolutionSteps)
+import System.IO.Unsafe (unsafePerformIO)
 
 
 handleEvent :: Event -> GameState -> GameState
@@ -23,9 +25,11 @@ handleStartScreen _ state = state
 
 handleGameScreen :: Event -> GameState -> GameState
 handleGameScreen (EventKey (MouseButton LeftButton) Down _ (mx, my)) state
-    | isButtonClicked mx my (-575) (150) = state { screen = StartScreen } -- Botón "Volver a Inicio"
-    | isButtonClicked mx my (-575) (-50) = resetGame state               -- Botón "Vaciar Tablero"
-    | isButtonClicked mx my (-575) (50) = resetGame state               -- Botón "Juego Nuevo"
+    | isButtonClicked mx my (-575) (300) = state { screen = StartScreen } -- Botón "Volver a Inicio"
+    | isButtonClicked mx my (-575) (200) = resetGame state               -- Botón "Vaciar Tablero"
+    | isButtonClicked mx my (-575) (100) = resetGame state               -- Botón "Juego Nuevo"
+    | isButtonClicked mx my (-575) (0)  = unsafePerformIO $ autoSolve state               -- Botón Autosolver
+    | isButtonClicked mx my (-575) (-100) = stopAutoSolve state              -- Parar Autosolver
     | -- Verifica si el clic es en una celda del tablero
       isCellClicked mx my = selectCell mx my state
     -- Si no, maneja clics generales en el tablero
@@ -69,6 +73,23 @@ handleEndScreen (EventKey (MouseButton LeftButton) Down _ (mx, my)) state
     | isButtonClicked mx my (-570) (150) = state { screen = GameScreen }
     | otherwise = state
 handleEndScreen _ state = state
+
+autoSolve :: GameState -> IO GameState
+autoSolve state = do
+    solutionSteps <- generateSolutionSteps state
+    let newBoard = applySolutionSteps (board state) solutionSteps
+    return state { board = newBoard, message = "Sudoku resuelto automáticamente." }
+
+-- Aplica los pasos generados al tablero
+applySolutionSteps :: Board -> [(Int, Int, Int)] -> Board
+applySolutionSteps board steps =
+    foldl (\b (r, c, v) -> updateBoard b r c (Just v)) board steps
+
+
+stopAutoSolve :: GameState -> GameState
+stopAutoSolve state = state { autoSolveRunning = False, message = "Autosolver detenido." }
+
+
 
 
 
