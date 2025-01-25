@@ -5,6 +5,7 @@ import Graphics.Gloss.Interface.Pure.Game
 import Events.EventHelpers
 import Logic.CSP (generateSolutionSteps)
 import System.IO.Unsafe (unsafePerformIO)
+import Logic.Logic (main1,generate,generateRandomSudoku)
 
 
 handleEvent :: Event -> GameState -> GameState
@@ -26,8 +27,10 @@ handleStartScreen _ state = state
 handleGameScreen :: Event -> GameState -> GameState
 handleGameScreen (EventKey (MouseButton LeftButton) Down _ (mx, my)) state
     | isButtonClicked mx my (-575) (300) = state { screen = StartScreen } -- Botón "Volver a Inicio"
-    | isButtonClicked mx my (-575) (200) = resetGame state               -- Botón "Vaciar Tablero"
-    | isButtonClicked mx my (-575) (100) = resetGame state               -- Botón "Juego Nuevo"
+    | isButtonClicked mx my (-575) (200) = unsafePerformIO $ do
+        board <- main1  -- Llamar a la función main para obtener el tablero
+        return state { board = board } -- Actualizar el estado con el nuevo tablero                
+    | isButtonClicked mx my (-575) (100) = resetGame state              
     | isButtonClicked mx my (-575) (0)  = unsafePerformIO $ autoSolve state               -- Botón Autosolver
     | isButtonClicked mx my (-575) (-100) = stopAutoSolve state              -- Parar Autosolver
     | -- Verifica si el clic es en una celda del tablero
