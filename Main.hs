@@ -4,6 +4,7 @@ import Graphics.Gloss
 import Views.Renderer (render)
 import Common
 import Events.Events (handleEvent)
+import Logic.Logic(main1)
 -- import Logic.Logic (generateBoard)
 
 -- Configuración de la ventana principal
@@ -65,15 +66,31 @@ main = do
     winTitle <- loadBMP "./win.bmp"
     schoolLogo <- loadBMP "./matcom.bmp"
     sudokuElements <- loadBMP "./elements.bmp"
+    sudokuBoard <- main1
 
     -- Crear el estado inicial con imágenes cargadas
-    let initialStateWithImages = initialState
-            { images = 
+    -- let initialStateWithImages = initialState
+    --         { images = 
+    --             [ ("startTitle", startTitle)
+    --             , ("winTitle", winTitle)
+    --             , ("schoolLogo", schoolLogo)
+    --             , ("sudokuElements", sudokuElements)
+    --             ]
+    --         }
+    let initialState = GameState
+            { screen = StartScreen  -- Pantalla inicial para pruebas
+            , board = sudokuBoard
+            , initialBoard = sudokuBoard
+            , selectedCell = (0, 0)
+            , message = ""
+            , isWin = False
+            , images = 
                 [ ("startTitle", startTitle)
                 , ("winTitle", winTitle)
                 , ("schoolLogo", schoolLogo)
                 , ("sudokuElements", sudokuElements)
                 ]
+            , autoSolveRunning = False
             }
 
     -- Ejecutar el juego
@@ -81,7 +98,7 @@ main = do
         window
         backgroundColor
         fps
-        initialStateWithImages
+        initialState
         render
         handleEvent
         update
