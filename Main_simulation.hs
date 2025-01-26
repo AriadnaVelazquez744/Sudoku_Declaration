@@ -1,9 +1,11 @@
-module MainSi where
+module Main where
 
 import Graphics.Gloss
 import Views.Renderer (render)
 import Common
 import Events.Events (handleEvent)
+import Logic.CSP (generateSolutionSteps)
+
 
 -- Configuración de la ventana para pruebas gráficas
 window :: Display
@@ -167,6 +169,20 @@ fps = 60
 --       (\_ state -> state)
 --       (\_ state -> state)
 
+exampleBoard :: Board
+exampleBoard =
+  [ [Just 5, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
+  , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
+  , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
+  , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
+  , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
+  , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
+  , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
+  , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
+  , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
+  ]
+
+
 
 -- Prueba pantalla de reglas
 main :: IO ()
@@ -177,27 +193,27 @@ main = do
             { screen = StartScreen  -- Pantalla inicial para pruebas
             , board = 
                   [ 
-                  [Just 5, Nothing, Nothing, Nothing, Just 7, Nothing, Nothing, Nothing, Just 3]
-                  , [Nothing, Nothing, Nothing, Just 1, Nothing, Just 9, Nothing, Nothing, Nothing]
-                  , [Nothing, Just 8, Nothing, Nothing, Nothing, Nothing, Nothing, Just 6, Nothing]
-                  , [Just 1, Nothing, Just 7, Nothing, Nothing, Nothing, Just 4, Nothing, Nothing]
-                  , [Nothing, Just 2, Nothing, Nothing, Just 5, Nothing, Nothing, Just 8, Nothing]
-                  , [Nothing, Nothing, Just 6, Nothing, Nothing, Nothing, Just 9, Nothing, Just 1]
-                  , [Nothing, Just 3, Nothing, Nothing, Nothing, Nothing, Nothing, Just 7, Nothing]
-                  , [Nothing, Nothing, Nothing, Just 6, Nothing, Just 2, Nothing, Nothing, Nothing]
-                  , [Just 4, Nothing, Nothing, Nothing, Just 8, Nothing, Nothing, Nothing, Just 9]
+                    [Just 3, Nothing, Nothing, Nothing, Nothing, Just 5, Just 8, Nothing, Just 1]
+                  , [Nothing, Just 8, Nothing, Nothing, Just 3, Just 6, Nothing, Just 2, Just 5]
+                  , [Nothing, Just 4, Nothing, Just 2, Nothing, Nothing, Nothing, Nothing, Nothing]
+                  , [Nothing, Nothing, Just 8, Nothing, Nothing, Nothing, Nothing, Nothing, Just 3]
+                  , [Just 4, Nothing, Nothing, Nothing, Just 5, Nothing, Just 7, Nothing, Nothing]
+                  , [Nothing, Nothing, Just 1, Nothing, Nothing, Nothing, Nothing, Nothing, Just 8]
+                  , [Nothing, Just 5, Nothing, Just 7, Nothing, Nothing, Nothing, Nothing, Nothing]
+                  , [Nothing, Just 2, Nothing, Nothing, Just 8, Just 1, Nothing, Just 7, Just 4]
+                  , [Just 6, Nothing, Nothing, Nothing, Nothing, Just 3, Just 9, Nothing, Just 2]
                   ] 
             , initialBoard = 
                   [ 
-                    [Just 5, Nothing, Nothing, Nothing, Just 7, Nothing, Nothing, Nothing, Just 3]
-                  , [Nothing, Nothing, Nothing, Just 1, Nothing, Just 9, Nothing, Nothing, Nothing]
-                  , [Nothing, Just 8, Nothing, Nothing, Nothing, Nothing, Nothing, Just 6, Nothing]
-                  , [Just 1, Nothing, Just 7, Nothing, Nothing, Nothing, Just 4, Nothing, Nothing]
-                  , [Nothing, Just 2, Nothing, Nothing, Just 5, Nothing, Nothing, Just 8, Nothing]
-                  , [Nothing, Nothing, Just 6, Nothing, Nothing, Nothing, Just 9, Nothing, Just 1]
-                  , [Nothing, Just 3, Nothing, Nothing, Nothing, Nothing, Nothing, Just 7, Nothing]
-                  , [Nothing, Nothing, Nothing, Just 6, Nothing, Just 2, Nothing, Nothing, Nothing]
-                  , [Just 4, Nothing, Nothing, Nothing, Just 8, Nothing, Nothing, Nothing, Just 9]
+                    [Just 3, Nothing, Nothing, Nothing, Nothing, Just 5, Just 8, Nothing, Just 1]
+                  , [Nothing, Just 8, Nothing, Nothing, Just 3, Just 6, Nothing, Just 2, Just 5]
+                  , [Nothing, Just 4, Nothing, Just 2, Nothing, Nothing, Nothing, Nothing, Nothing]
+                  , [Nothing, Nothing, Just 8, Nothing, Nothing, Nothing, Nothing, Nothing, Just 3]
+                  , [Just 4, Nothing, Nothing, Nothing, Just 5, Nothing, Just 7, Nothing, Nothing]
+                  , [Nothing, Nothing, Just 1, Nothing, Nothing, Nothing, Nothing, Nothing, Just 8]
+                  , [Nothing, Just 5, Nothing, Just 7, Nothing, Nothing, Nothing, Nothing, Nothing]
+                  , [Nothing, Just 2, Nothing, Nothing, Just 8, Just 1, Nothing, Just 7, Just 4]
+                  , [Just 6, Nothing, Nothing, Nothing, Nothing, Just 3, Just 9, Nothing, Just 2]
                   ]
             , selectedCell = (0, 0)
             , message = ""
@@ -215,3 +231,33 @@ main = do
             handleEvent  -- Maneja eventos
             (\_ state -> state) -- Sin actualizaciones en cada frame
 
+-- Prueba CSP
+
+-- testBoard :: Board
+-- testBoard =
+--   [ [Just 5, Just 3, Nothing, Nothing, Just 7, Nothing, Nothing, Nothing, Nothing]
+--   , [Just 6, Nothing, Nothing, Just 1, Just 9, Just 5, Nothing, Nothing, Nothing]
+--   , [Nothing, Just 9, Just 8, Nothing, Nothing, Nothing, Nothing, Just 6, Nothing]
+--   , [Just 8, Nothing, Nothing, Nothing, Just 6, Nothing, Nothing, Nothing, Just 3]
+--   , [Just 4, Nothing, Nothing, Just 8, Nothing, Just 3, Nothing, Nothing, Just 1]
+--   , [Just 7, Nothing, Nothing, Nothing, Just 2, Nothing, Nothing, Nothing, Just 6]
+--   , [Nothing, Just 6, Nothing, Nothing, Nothing, Nothing, Just 2, Just 8, Nothing]
+--   , [Nothing, Nothing, Nothing, Just 4, Just 1, Just 9, Nothing, Nothing, Just 5]
+--   , [Nothing, Nothing, Nothing, Nothing, Just 8, Nothing, Nothing, Just 7, Just 9]
+--   ]
+
+
+-- main :: IO ()
+-- main = do
+--   let testState = GameState
+--         { screen = StartScreen
+--         , board = testBoard
+--         , initialBoard = testBoard
+--         , selectedCell = (0, 0)
+--         , message = ""
+--         , isWin = False
+--         , images = []
+--         , autoSolveRunning = False
+--         }
+--   steps <- generateSolutionSteps testState
+--   print steps

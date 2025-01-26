@@ -1,116 +1,372 @@
+-- module Logic.CSP (generateSolutionSteps) where
+
+-- import Common (GameState(..), Board)
+-- import Data.List (minimumBy)
+-- import Data.Ord (comparing)
+-- import Data.Maybe (isJust)
+
+-- -- Representa el estado enriquecido de una celda.
+-- data CSPCell = CSPStatic Int Int Int       -- Valor inicial fijo (número, fila, columna).
+--              | CSPFixed Int Int Int        -- Valor asignado (número, fila, columna).
+--              | CSPPossibles [Int] Int Int  -- Valores posibles (lista, fila, columna).
+--   deriving (Show, Eq)
+
+-- -- Representa el tablero CSP enriquecido.
+-- type CSPBoard = [[CSPCell]]
+
+-- -- Punto de entrada principal.
+-- generateSolutionSteps :: GameState -> IO [(Int, Int, Int)]
+-- generateSolutionSteps gameState = do
+--     let initial = parseCSPBoard (initialBoard gameState)
+--     let initialPositions = getInitialPositions (initialBoard gameState)
+--     putStrLn "Tablero inicial convertido a CSP:"
+--     print initial
+--     result <- solveCSP initial [] []
+--     case result of
+--         Just solution -> do
+--             let filteredSolution = filterSolution solution initialPositions
+--             putStrLn "Solución encontrada:"
+--             print filteredSolution
+--             return filteredSolution
+--         Nothing -> do
+--             putStrLn "No se encontró una solución."
+--             return []
+
+-- -- Convierte un tablero inicial en un CSPBoard.
+-- parseCSPBoard :: Board -> CSPBoard
+-- parseCSPBoard board =
+--     [[parseCell r c (board !! r !! c) | c <- [0..8]] | r <- [0..8]]
+--   where
+--     parseCell :: Int -> Int -> Maybe Int -> CSPCell
+--     parseCell r c (Just n) = CSPStatic n r c
+--     parseCell r c Nothing  = CSPPossibles [1..9] r c
+
+-- -- Obtiene las posiciones iniciales (celdas estáticas).
+-- getInitialPositions :: Board -> [(Int, Int)]
+-- getInitialPositions board =
+--     [(r, c) | r <- [0..8], c <- [0..8], isJust (board !! r !! c)]
+
+-- -- Actualiza las posibilidades en todo el tablero.
+-- updatePossibilities :: CSPBoard -> CSPBoard
+-- updatePossibilities board =
+--   [ [ updateCell r c board | c <- [0..8] ] | r <- [0..8] ]
+--   where
+--     updateCell :: Int -> Int -> CSPBoard -> CSPCell
+--     updateCell r c b = case b !! r !! c of
+--         CSPStatic n r' c'     -> CSPStatic n r' c'  -- No cambia.
+--         CSPFixed n r' c'      -> CSPFixed n r' c'   -- Ya resuelta, no cambia.
+--         CSPPossibles _ r' c'  -> CSPPossibles (filterByRules r c b) r' c'
+
+-- -- Filtra los valores posibles de una celda según las reglas.
+-- filterByRules :: Int -> Int -> CSPBoard -> [Int]
+-- filterByRules r c board =
+--   let rowVals = getRow r board
+--       colVals = getCol c board
+--       blockVals = getBlock r c board
+--       usedVals = rowVals ++ colVals ++ blockVals
+--   in [x | x <- [1..9], x `notElem` usedVals]
+
+-- -- Obtiene los valores fijos de la fila.
+-- getRow :: Int -> CSPBoard -> [Int]
+-- getRow r board = [ n | CSPStatic n _ _ <- board !! r ] ++
+--                  [ n | CSPFixed n _ _  <- board !! r ]
+
+-- -- Obtiene los valores fijos de la columna.
+-- getCol :: Int -> CSPBoard -> [Int]
+-- getCol c board = [ n | row <- board, CSPStatic n _ _ <- [row !! c] ] ++
+--                  [ n | row <- board, CSPFixed n _ _  <- [row !! c] ]
+
+-- -- Obtiene los valores fijos del bloque 3x3.
+-- getBlock :: Int -> Int -> CSPBoard -> [Int]
+-- getBlock r c board =
+--   let startRow = (r `div` 3) * 3
+--       startCol = (c `div` 3) * 3
+--   in [ n | i <- [0..2], j <- [0..2],
+--            CSPStatic n _ _ <- [board !! (startRow + i) !! (startCol + j)] ] ++
+--      [ n | i <- [0..2], j <- [0..2],
+--            CSPFixed n _ _  <- [board !! (startRow + i) !! (startCol + j)] ]
+
+-- -- Selecciona la siguiente celda a resolver.
+-- selectNextCell :: CSPBoard -> Maybe (Int, Int, [Int])
+-- selectNextCell board = do
+--   let candidates = [ (r, c, possibles)
+--                  | (r, row) <- zip [0..] board,
+--                    (c, CSPPossibles possibles _ _) <- zip [0..] row ]
+--   if null candidates
+--     then Nothing
+--     else Just $ minimumBy (\(_, _, ps1) (_, _, ps2) -> compare (length ps1) (length ps2)) candidates
+
+-- -- Resuelve el CSP usando backtracking.
+-- solveCSP :: CSPBoard -> [(Int, Int, Int)] -> [CSPBoard] -> IO (Maybe [(Int, Int, Int)])
+-- solveCSP board solution history = do
+--   if isComplete board
+--     then do
+--       putStrLn "¡Tablero completo!"
+--       return (Just solution)
+--     else case selectNextCell board of
+--       Nothing -> do
+--         putStrLn "No se encontraron celdas para resolver."
+--         return Nothing
+--       Just (r, c, possibles) -> tryPossibilities r c possibles
+--   where
+--     tryPossibilities :: Int -> Int -> [Int] -> IO (Maybe [(Int, Int, Int)])
+--     tryPossibilities _ _ [] = do
+--       putStrLn "Retrocediendo..."
+--       return Nothing
+--     tryPossibilities r c (val:vals) = do
+--       putStrLn $ "Intentando asignar " ++ show val ++ " a la celda (" ++ show r ++ ", " ++ show c ++ ")"
+--       let newBoard = applyAssignment board r c val
+--       let newHistory = board : history
+--       result <- solveCSP (updatePossibilities newBoard) ((r, c, val) : solution) newHistory
+--       case result of
+--         Just sol -> return (Just sol)
+--         Nothing  -> do
+--           putStrLn $ "Falló asignación de " ++ show val ++ " a la celda (" ++ show r ++ ", " ++ show c ++ ")"
+--           solveCSP (head newHistory) solution (tail newHistory)
+
+-- -- Verifica si el tablero está completo.
+-- isComplete :: CSPBoard -> Bool
+-- isComplete = all (all isFixed)
+--   where
+--     isFixed (CSPStatic _ _ _) = True
+--     isFixed (CSPFixed _ _ _)  = True
+--     isFixed _                 = False
+
+-- -- Asigna un valor fijo a una celda.
+-- applyAssignment :: CSPBoard -> Int -> Int -> Int -> CSPBoard
+-- applyAssignment board r c val =
+--     [[updateCell r' c' cell | (c', cell) <- zip [0..] row] | (r', row) <- zip [0..] board]
+--   where
+--     updateCell r' c' cell
+--       | r' == r && c' == c = case cell of
+--           CSPPossibles _ _ _ -> CSPFixed val r' c'
+--           _ -> cell
+--       | otherwise = cell
+
+-- -- Filtra las celdas estáticas de la solución final.
+-- filterSolution :: [(Int, Int, Int)] -> [(Int, Int)] -> [(Int, Int, Int)]
+-- filterSolution solution initialPositions =
+--     [step | step@(r, c, _) <- solution, (r, c) `notElem` initialPositions]
+
+
 module Logic.CSP (generateSolutionSteps) where
 
 import Common (GameState(..), Board)
--- import Logic (isValidMove)
-import Data.List (sortBy, intersect, (\\))
-import Data.Maybe (catMaybes)
-import System.Random (randomRIO)
+import Data.List (minimumBy)
+import Data.Ord (comparing)
+import Data.Maybe (isJust)
 
--- Encuentra las celdas vacías en el tablero
-findEmptyCells :: Board -> [(Int, Int)]
-findEmptyCells board =
-  [(r, c) | r <- [0..8], c <- [0..8], board !! r !! c == Nothing]
+-- Representa el estado enriquecido de una celda.
+data CSPCell = CSPStatic Int Int Int       -- Valor inicial fijo (número, fila, columna).
+             | CSPFixed Int Int Int        -- Valor asignado (número, fila, columna).
+             | CSPPossibles [Int] Int Int  -- Valores posibles (lista, fila, columna).
+  deriving (Show, Eq)
 
--- Calcula los valores válidos para una celda específica (intersección fila, columna, bloque)
-validValues :: Board -> (Int, Int) -> [Int]
-validValues board (row, col) =
-  let allValues = [1..9]
-      rowValues = getRow row board
-      colValues = getCol col board
-      blockValues = getBox (row, col) board
-  in allValues \\ (rowValues ++ colValues ++ blockValues)
+-- Representa el tablero CSP enriquecido.
+type CSPBoard = [[CSPCell]]
 
--- Heurística para encontrar la celda más prometedora
-findBestCell :: Board -> Maybe ((Int, Int), [Int])
-findBestCell board =
-  let emptyCells = findEmptyCells board
-      cellDomains = [(cell, validValues board cell) | cell <- emptyCells]
-      -- Ordenar celdas por tamaño de dominio (MRV), filas y columnas más completas
-      rankedCells = sortBy (compareCells board) cellDomains
-  in case rankedCells of
-       [] -> Nothing
-       (cell, domain):_ -> Just (cell, domain)
-
--- Comparador heurístico: Intersección de filas, columnas y bloques
-compareCells :: Board -> ((Int, Int), [Int]) -> ((Int, Int), [Int]) -> Ordering
-compareCells board ((r1, c1), d1) ((r2, c2), d2) =
-  let score1 = completionScore board r1 c1
-      score2 = completionScore board r2 c2
-  in compare score2 score1 <> compare (length d1) (length d2)
-
--- Puntuación por intersección de fila, columna y bloque
-completionScore :: Board -> Int -> Int -> Int
-completionScore board row col =
-  let rowScore = length (getRow row board)
-      colScore = length (getCol col board)
-      blockScore = length (getBox (row, col) board)
-  in rowScore + colScore + blockScore
-
--- Genera pasos válidos para resolver el Sudoku
+-- Punto de entrada principal.
 generateSolutionSteps :: GameState -> IO [(Int, Int, Int)]
-generateSolutionSteps initialState = solve (board initialState) []
+generateSolutionSteps gameState = do
+    let initial = parseCSPBoard (initialBoard gameState)
+    let initialPositions = getInitialPositions (initialBoard gameState)
+    putStrLn "Tablero inicial convertido a CSP:"
+    print initial
+    result <- solveCSP initial [] []
+    case result of
+        Just solution -> do
+            -- let filteredSolution = filterSolution solution initialPositions
+            if isValidSolution initial solution
+                then do
+                    putStrLn "Solución encontrada:"
+                    print solution
+                    return solution
+                else do
+                    putStrLn "La solución no es válida."
+                    return []
+        Nothing -> do
+            putStrLn "No se encontró una solución."
+            return []
+
+-- Convierte un tablero inicial en un CSPBoard.
+parseCSPBoard :: Board -> CSPBoard
+parseCSPBoard board =
+    [[parseCell r c (board !! r !! c) | c <- [0..8]] | r <- [0..8]]
   where
-    solve :: Board -> [(Int, Int, Int)] -> IO [(Int, Int, Int)]
-    solve board steps =
-      case findBestCell board of
-        Nothing -> return steps -- Tablero completo o sin solución
-        Just ((row, col), possibleValues) -> do
-          shuffledValues <- shuffle possibleValues -- Mezcla los valores posibles
-          let validSteps = [(row, col, val) | val <- shuffledValues, isValidMove board val (row, col)]
-          case validSteps of
-            [] -> return steps -- No se encontraron movimientos válidos
-            (step:_) -> do
-              let (r, c, v) = step
-              let newBoard = updateBoard board (r, c) (Just v)
-              solve newBoard (steps ++ [step])
+    parseCell :: Int -> Int -> Maybe Int -> CSPCell
+    parseCell r c (Just n) = CSPStatic n r c
+    parseCell r c Nothing  = CSPPossibles [1..9] r c
 
--- Actualiza el valor en una celda específica del tablero
-updateBoard :: Board -> (Int, Int) -> Maybe Int -> Board
-updateBoard board (row, col) val =
-  take row board ++
-  [take col (board !! row) ++ [val] ++ drop (col + 1) (board !! row)] ++
-  drop (row + 1) board
+-- Obtiene las posiciones iniciales (celdas estáticas).
+getInitialPositions :: Board -> [(Int, Int)]
+getInitialPositions board =
+    [(r, c) | r <- [0..8], c <- [0..8], isJust (board !! r !! c)]
 
--- Mezcla una lista de valores aleatoriamente
-shuffle :: [a] -> IO [a]
-shuffle [] = return []
-shuffle xs = do
-  i <- randomRIO (0, length xs - 1)
-  let (before, x:after) = splitAt i xs
-  rest <- shuffle (before ++ after)
-  return (x : rest)
+-- Actualiza las posibilidades en todo el tablero.
+updatePossibilities :: CSPBoard -> CSPBoard
+updatePossibilities board =
+  [ [ updateCell r c board | c <- [0..8] ] | r <- [0..8] ]
+  where
+    updateCell :: Int -> Int -> CSPBoard -> CSPCell
+    updateCell r c b = case b !! r !! c of
+        CSPStatic n r' c'     -> CSPStatic n r' c'  -- No cambia.
+        CSPFixed n r' c'      -> CSPFixed n r' c'   -- Ya resuelta, no cambia.
+        CSPPossibles _ r' c'  -> CSPPossibles (filterByRules r c b) r' c'
 
--- Helpers para obtener filas, columnas y bloques
-getRow :: Int -> Board -> [Int]
-getRow row board = catMaybes (board !! row)
+-- Filtra los valores posibles de una celda según las reglas.
+filterByRules :: Int -> Int -> CSPBoard -> [Int]
+filterByRules r c board =
+  let rowVals = getRow r board
+      colVals = getCol c board
+      blockVals = getBlock r c board
+      usedVals = rowVals ++ colVals ++ blockVals
+  in [x | x <- [1..9], x `notElem` usedVals]
 
-getCol :: Int -> Board -> [Int]
-getCol col board = catMaybes [board !! r !! col | r <- [0..8]]
+-- Obtiene los valores fijos de la fila.
+getRow :: Int -> CSPBoard -> [Int]
+getRow r board = [ n | CSPStatic n _ _ <- board !! r ] ++
+                 [ n | CSPFixed n _ _  <- board !! r ]
 
-getBox :: (Int, Int) -> Board -> [Int]
-getBox (row, col) board =
-  let boxRow = (row `div` 3) * 3
-      boxCol = (col `div` 3) * 3
-  in catMaybes [board !! r !! c | r <- [boxRow..boxRow+2], c <- [boxCol..boxCol+2]]
+-- Obtiene los valores fijos de la columna.
+getCol :: Int -> CSPBoard -> [Int]
+getCol c board = [ n | row <- board, CSPStatic n _ _ <- [row !! c] ] ++
+                 [ n | row <- board, CSPFixed n _ _  <- [row !! c] ]
+
+-- Obtiene los valores fijos del bloque 3x3.
+getBlock :: Int -> Int -> CSPBoard -> [Int]
+getBlock r c board =
+  let startRow = (r `div` 3) * 3
+      startCol = (c `div` 3) * 3
+  in [ n | i <- [0..2], j <- [0..2],
+           CSPStatic n _ _ <- [board !! (startRow + i) !! (startCol + j)] ] ++
+     [ n | i <- [0..2], j <- [0..2],
+           CSPFixed n _ _  <- [board !! (startRow + i) !! (startCol + j)] ]
+
+-- Selecciona la siguiente celda a resolver.
+selectNextCell :: CSPBoard -> Maybe (Int, Int, [Int])
+selectNextCell board = do
+  let candidates = [ (r, c, possibles)
+                 | (r, row) <- zip [0..] board,
+                   (c, CSPPossibles possibles _ _) <- zip [0..] row ]
+  if null candidates
+    then Nothing
+    else Just $ minimumBy (\(_, _, ps1) (_, _, ps2) -> compare (length ps1) (length ps2)) candidates
+
+-- Resuelve el CSP usando backtracking.
+solveCSP :: CSPBoard -> [(Int, Int, Int)] -> [CSPBoard] -> IO (Maybe [(Int, Int, Int)])
+solveCSP board solution history = do
+  if isComplete board
+    then do
+      putStrLn "¡Tablero completo!"
+      return (Just solution)
+    else case selectNextCell board of
+      Nothing -> do
+        putStrLn "No se encontraron celdas para resolver."
+        return Nothing
+      Just (r, c, possibles) -> tryPossibilities r c possibles history
+  where
+    tryPossibilities :: Int -> Int -> [Int] -> [CSPBoard] -> IO (Maybe [(Int, Int, Int)])
+    tryPossibilities r c [] history = do
+      putStrLn "Retrocediendo..."
+      return Nothing
+    tryPossibilities r c (val:vals) history = do
+      putStrLn $ "Intentando asignar " ++ show val ++ " a la celda (" ++ show r ++ ", " ++ show c ++ ")"
+      let newBoard = applyAssignment board r c val
+      result <- solveCSP (updatePossibilities newBoard) ((r, c, val) : solution) (board : history)
+      case result of
+        Just sol -> return (Just sol)
+        Nothing  -> do
+          putStrLn $ "Falló asignación de " ++ show val ++ " a la celda (" ++ show r ++ ", " ++ show c ++ ")"
+          tryPossibilities r c vals history
+
+-- Verifica si el tablero está completo.
+isComplete :: CSPBoard -> Bool
+isComplete = all (all isFixed)
+  where
+    isFixed (CSPStatic _ _ _) = True
+    isFixed (CSPFixed _ _ _)  = True
+    isFixed _                 = False
+
+
+-- Asigna un valor fijo a una celda.
+applyAssignment :: CSPBoard -> Int -> Int -> Int -> CSPBoard
+applyAssignment board r c val =
+    [[updateCell r' c' cell | (c', cell) <- zip [0..] row] | (r', row) <- zip [0..] board]
+  where
+    updateCell r' c' cell
+      | r' == r && c' == c = case cell of
+          CSPPossibles _ _ _ -> CSPFixed val r' c'
+          _ -> cell
+      | otherwise = cell
+
+-- Filtra las celdas estáticas de la solución final.
+filterSolution :: [(Int, Int, Int)] -> [(Int, Int)] -> [(Int, Int, Int)]
+filterSolution solution initialPositions =
+    [step | step@(r, c, _) <- solution, (r, c) `notElem` initialPositions]
 
 
 
+-- Verifica si una solución es válida de acuerdo con las reglas del Sudoku.
+isValidSolution :: CSPBoard -> [(Int, Int, Int)] -> Bool
+isValidSolution board solution =
+  noEmptyCells finalBoard &&
+  all isValidGroup allGroups
+  where
+    -- Combina el tablero inicial y la solución CSP para generar el tablero final.
+    finalBoard = applySolution board solution
+
+    -- Verifica que no existan celdas vacías.
+    noEmptyCells :: [[Int]] -> Bool
+    noEmptyCells = all (all (/= 0))
+
+    -- Verifica si todos los valores en un grupo (fila, columna o bloque) son únicos.
+    isValidGroup :: [Int] -> Bool
+    isValidGroup group = length group == length (unique group)
+
+    -- Obtiene todos los grupos (filas, columnas y bloques) del tablero final.
+    allGroups :: [[Int]]
+    allGroups = getAllRows finalBoard ++ getAllCols finalBoard ++ getAllBlocks finalBoard
+
+    -- Elimina duplicados en una lista.
+    unique :: [Int] -> [Int]
+    unique = foldr (\x seen -> if x `elem` seen then seen else x : seen) []
+
+
+-- Combina el tablero inicial con la solución para generar el tablero final.
+applySolution :: CSPBoard -> [(Int, Int, Int)] -> [[Int]]
+applySolution board solution =
+  [[resolveCell r c | c <- [0..8]] | r <- [0..8]]
+  where
+    -- Convierte la solución a un formato compatible con lookup.
+    solutionMap = convertSolution solution
+
+    -- Resuelve el valor final de una celda, combinando el tablero inicial y la solución CSP.
+    resolveCell :: Int -> Int -> Int
+    resolveCell r c =
+      case (board !! r !! c, lookup (r, c) solutionMap) of
+        (CSPStatic n _ _, Nothing) -> n       -- Mantener las celdas estáticas.
+        (CSPPossibles _ _ _, Just val) -> val -- Usar valores del CSP para celdas resueltas.
+        (CSPStatic _ _ _, Just _)  -> error $ "Las celdas estáticas no deben sobrescribirse: (" ++ show r ++ ", " ++ show c ++ ")"
+        (CSPPossibles _ _ _, Nothing) -> error $ "Celda sin resolver: (" ++ show r ++ ", " ++ show c ++ ")"
+        _ -> error $ "Estado inesperado en la celda: (" ++ show r ++ ", " ++ show c ++ ")"
+
+-- Convierte [(Int, Int, Int)] en [((Int, Int), Int)].
+convertSolution :: [(Int, Int, Int)] -> [((Int, Int), Int)]
+convertSolution = map (\(r, c, val) -> ((r, c), val))
 
 
 
+-- Obtiene todas las filas del tablero.
+getAllRows :: [[Int]] -> [[Int]]
+getAllRows = id
 
+-- Obtiene todas las columnas del tablero.
+getAllCols :: [[Int]] -> [[Int]]
+getAllCols board = [[board !! r !! c | r <- [0..8]] | c <- [0..8]]
 
-
-
--- Verifica si un número puede colocarse en una celda
-isValidMove :: Board -> Int -> (Int, Int) -> Bool
-isValidMove board val (row, col) =
-  let rowValues = getRow row board
-      colValues = getCol col board
-      blockValues = getBox (row, col) board
-  in val `notElem` (rowValues ++ colValues ++ blockValues)
-
-
-
-
-
+-- Obtiene todos los bloques 3x3 del tablero.
+getAllBlocks :: [[Int]] -> [[Int]]
+getAllBlocks board =
+  [ [ board !! (rBase + rOffset) !! (cBase + cOffset)
+    | rOffset <- [0..2], cOffset <- [0..2] ]
+  | rBase <- [0,3,6], cBase <- [0,3,6] ]
