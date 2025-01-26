@@ -1,102 +1,123 @@
 module Logic.Logic where
 
-import System.Random
-import Data.List (transpose)
-import Control.Monad
-import Data.Maybe (fromJust)
+import System.Random (randomRIO)
+import Data.List (nub)
+
 
 type Board = [[Maybe Int]]
+type Plantilla = [[Bool]]
 
--- Función para imprimir el tablero de Sudoku
-printBoard :: Board -> IO ()
-printBoard board = do
-    let line = replicate 21 '-'
-    putStrLn line
-    forM_ board $ \row -> do
-        putStr "|"
-        forM_ row $ \cell ->
-            case cell of
-                Just n -> putStr $ show n ++ " "
-                Nothing -> putStr "  "
-        putStrLn "|"
-    putStrLn line
+-- Genera un tablero inicial válido de Sudoku
+generateNewBoard :: IO Board
+generateNewBoard = do
+    let emptyBoard = replicate 9 (replicate 9 Nothing) -- Tablero vacío
+    solvedBoard <- solveBoard emptyBoard               -- Llena el tablero usando Backtracking
+    removeCells solvedBoard                        -- Elimina celdas para crear el desafío
 
+-- Llena el tablero usando Backtracking
+solveBoard :: Board -> IO Board
+solveBoard board = solveHelper board 0 0
 
--- Función para verificar si un número es válido en una posición dada
-isValid :: Board -> Int -> Int -> Int -> Bool
-isValid board row col num =
-  not (
-    any (\n -> board !! row !! n == Just num) [0..8] || -- Verificar fila -- Verificar fila
-     -- Verificar fila
-    any (\n -> board !! n !! col == Just num) [0..8] || -- Verificar columna -- Verificar columna
-    any (\r -> any (\c -> board !! ((row `div` 3) * 3 + r) !! ((col `div` 3) * 3 + c) == Just num) [0..2]) [0..2]
-  )
+solveHelper :: Board -> Int -> Int -> IO Board
+solveHelper board 9 _ = return board -- Si hemos llenado todas las filas, el tablero está completo
+solveHelper board row col
+    | col >= 9 = solveHelper board (row + 1) 0 -- Pasa a la siguiente fila
+    | board !! row !! col /= Nothing = solveHelper board row (col + 1) -- Si la celda ya está llena, avanza
+    | otherwise = do
+        numbers <- shuffle [1..9] -- Mezcla los números para aleatoriedad
+        tryNumbers board row col numbers
+  where
+    tryNumbers :: Board -> Int -> Int -> [Int] -> IO Board
+    tryNumbers board _ _ [] = return board -- Si no hay más números que probar, regresa el tablero
+    tryNumbers board row col (n:ns)
+        | isValidMove board n (row, col) = do
+            let newBoard = updateBoard board row col (Just n)
+            result <- solveHelper newBoard row (col + 1)
+            if isBoardComplete result then return result else tryNumbers board row col ns
+        | otherwise = tryNumbers board row col ns
 
+-- Modifica el tablero según una plantilla
+removeCells :: Board -> IO Board
+removeCells board = do
+    -- Seleccionar una plantilla al azar
+    plantilla <- selectRandomTemplate
+    -- Aplicar la plantilla al tablero
+    return (applyTemplate board plantilla)
 
--- Función para encontrar la siguiente celda vacía
-findEmpty :: Board -> Maybe (Int, Int)
-findEmpty board =
-  foldr (\(r, row) acc ->
-    case acc of
-       Just _ -> acc -- Si ya encontró una celda vacóa
-       Nothing ->
-           foldr (\(c, cell) acc' ->
-               case acc' of
-                   Just _ -> acc' -- Si ya encontró una celda vacía
-                   Nothing -> if cell == Nothing then Just (r,c) else Nothing
-              ) Nothing (zip [0..8] row)
-   ) Nothing (zip [0..8] board)
+-- Verifica si un movimiento es válido
+isValidMove :: Board -> Int -> (Int, Int) -> Bool
+isValidMove board val (row, col) =
+    notElem val (getRow row board) &&
+    notElem val (getColumn col board) &&
+    notElem val (getSubGrid (row, col) board)
 
+getRow :: Int -> Board -> [Int]
+getRow row board = [v | Just v <- board !! row]
 
--- Función principal de resolución usando backtracking
-solveSudoku :: Board -> IO (Maybe Board)
-solveSudoku board = do
-  case findEmpty board of
-    Nothing -> return (Just board)  -- El tablero está resuelto
-    Just (row, col) -> do
-        nums <- shuffle [1..9]  -- Números a probar en orden aleatorio
-        foldM (\acc num ->
-               case acc of
-                  Just result -> return $ Just result
-                  Nothing ->
-                      if isValid board row col num
-                          then do
-                              solveSudoku $ replaceCell board row col (Just num)
-                          else return Nothing
-           ) Nothing nums
+getColumn :: Int -> Board -> [Int]
+getColumn col board = [v | Just v <- map (!! col) board]
 
+getSubGrid :: (Int, Int) -> Board -> [Int]
+getSubGrid (row, col) board =
+    let startRow = (row `div` 3) * 3
+        startCol = (col `div` 3) * 3
+    in [v | r <- take 3 (drop startRow board), Just v <- take 3 (drop startCol r)]
 
--- Función para insertar el elemento en el tablero
-replaceCell :: Board -> Int -> Int -> Maybe Int -> Board
-replaceCell board row col value =
-  let (beforeRow, currentRow:afterRows) = splitAt row board
-      (beforeCell, _ : afterCells) = splitAt col currentRow
-  in beforeRow ++ [beforeCell ++ [value] ++ afterCells] ++ afterRows
+-- Actualiza una celda en el tablero
+updateBoard :: Board -> Int -> Int -> Maybe Int -> Board
+updateBoard board row col val =
+    take row board ++
+    [take col (board !! row) ++ [val] ++ drop (col + 1) (board !! row)] ++
+    drop (row + 1) board
 
+-- Comprueba si el tablero está completo
+isBoardComplete :: Board -> Bool
+isBoardComplete board = all (all (/= Nothing)) board
 
--- Función para crear un tablero vacio
-emptyBoard :: Board
-emptyBoard = replicate 9 (replicate 9 Nothing)
-
-
--- Función para mezclar una lista de forma aleatoria
+-- Mezcla una lista (para aleatoriedad en Backtracking)
 shuffle :: [a] -> IO [a]
+shuffle [] = return []
 shuffle xs = do
-  g <- newStdGen
-  return $ shuffle' g xs
+    idx <- randomRIO (0, length xs - 1)
+    let (before, x:after) = splitAt idx xs
+    rest <- shuffle (before ++ after)
+    return (x : rest)
 
-shuffle' :: StdGen -> [a] -> [a]
-shuffle' _ [] = []
-shuffle' g xs =
-  let (i, g') = randomR (0, length xs - 1) g
-      (left, x:right) = splitAt i xs
-  in x : shuffle' g' (left ++ right)
+isWinCondition :: Board -> Bool
+isWinCondition board =
+    isBoardComplete board && -- Verifica que el tablero esté lleno
+    all isUnique (map (`getRow` board) [0..8]) && -- Todas las filas son únicas
+    all isUnique (map (`getColumn` board) [0..8]) && -- Todas las columnas son únicas
+    all isUnique [getSubGrid (x, y) board | x <- [0, 3, 6], y <- [0, 3, 6]] -- Todos los subcuadros son únicos
 
+-- Verifica si una lista no tiene duplicados
+isUnique :: [Int] -> Bool
+isUnique xs = length xs == length (nub xs)
 
--- Función para generar un tablero de Sudoku aleatorio
-generateRandomSudoku :: IO (Maybe Board)
-generateRandomSudoku = do
-  solveSudoku emptyBoard
+-- Plantillas disponibles
+plantillas :: [Plantilla]
+plantillas = [plantilla_1, plantilla_2, plantilla_3, plantilla_4, plantilla_5]
+
+-- Selecciona una plantilla al azar
+selectRandomTemplate :: IO Plantilla
+selectRandomTemplate = do
+    index <- randomRIO (0, length plantillas - 1)
+    return (plantillas !! index)
+
+-- Aplica la plantilla al tablero
+applyTemplate :: Board -> Plantilla -> Board
+applyTemplate board plantilla =
+    zipWith (zipWith applyCell) board plantilla
+  where
+    applyCell :: Maybe Int -> Bool -> Maybe Int
+    applyCell cell keep
+        | keep      = cell   -- Si el valor en la plantilla es True, conserva la celda.
+        | otherwise = Nothing -- Si es False, elimina el valor.
+
+-- -- Función para generar un tablero de Sudoku aleatorio
+-- generateRandomSudoku :: IO (Maybe Board)
+-- generateRandomSudoku = do
+--   solveSudoku emptyBoard
 
 --Plantillas para generar diferentes tipos de sudoku
 plantilla_1 = [[True, False, False, False, False, True, False, True, False],
@@ -149,15 +170,6 @@ plantilla_5 = [[True, True, False, False, True, True, False, False, True],
                [True, False, True, False, True, True, False, False, False],
                [True, False, False, True, True, False, False, True, True]]
 
---Función para eliminar elementos del sudoku según la plantilla elegida
-replaceWithZeros :: Board -> [[Bool]] -> Board
-replaceWithZeros = zipWith (zipWith replace)
-  where
-    replace :: Maybe Int -> Bool -> Maybe Int
-    -- replace (Just _) False = Just 0
-    replace (Just _) False = Nothing
-    replace x _ = x
-
 --Función para elegir una plantilla al azar
 generate :: IO [[Bool]]
 generate = do
@@ -165,12 +177,3 @@ generate = do
     i <- randomRIO (0, length plantillas - 1)
     return (plantillas !! i)
 
-main1 :: IO Board
-main1 = do
-  solution <- generateRandomSudoku
-  plantilla <- generate  
-
-  case solution of
-      Just board -> do
-        let puzzle = replaceWithZeros board plantilla
-        return puzzle

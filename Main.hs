@@ -4,7 +4,7 @@ import Graphics.Gloss
 import Views.Renderer (render)
 import Common
 import Events.Events (handleEvent)
-import Logic.Logic(main1)
+import Logic.Logic(generateNewBoard, isBoardComplete, isWinCondition, isValidMove)
 -- import Logic.Logic (generateBoard)
 
 -- Configuración de la ventana principal
@@ -66,7 +66,7 @@ main = do
     winTitle <- loadBMP "./win.bmp"
     schoolLogo <- loadBMP "./matcom.bmp"
     sudokuElements <- loadBMP "./elements.bmp"
-    sudokuBoard <- main1
+    sudokuBoard <- generateNewBoard
 
     -- Crear el estado inicial con imágenes cargadas
     -- let initialStateWithImages = initialState

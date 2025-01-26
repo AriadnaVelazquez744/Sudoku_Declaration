@@ -2,6 +2,8 @@ module Events.EventHelpers where
 
 import Graphics.Gloss.Interface.Pure.Game
 import Common
+import Logic.Logic (generateNewBoard, isBoardComplete, isWinCondition, isValidMove)
+import System.IO.Unsafe (unsafePerformIO)
 
 handleBoardClick :: Float -> Float -> GameState -> GameState
 handleBoardClick mx my state =
@@ -18,9 +20,15 @@ insertValue :: Int -> GameState -> GameState
 insertValue val state =
     let (x, y) = selectedCell state
         initial = initialBoard state !! y !! x
-    in if initial == Nothing
-        then state { board = updateBoard (board state) x y (Just val) }
-        else state { message = "No puedes modificar esta casilla." }
+        currentBoard = board state
+    in if initial /= Nothing
+        then state { message = "No puedes modificar esta casilla." } -- Celda protegida
+        else
+            let newBoard = updateBoard currentBoard x y (Just val)
+            in if isValidCurrentState newBoard (x, y)
+                then state { board = newBoard, message = "" } -- Movimiento válido, limpia mensaje
+                else state { message = "Movimiento inválido: el número ya existe en la fila o columna." } -- Movimiento inválido
+
 
 screenToCell :: Float -> Float -> (Int, Int)
 screenToCell mx my = (floor (mx / cellSize), floor (-my / cellSize))
@@ -72,6 +80,21 @@ deleteValue state =
             then state { board = updateBoard (board state) x y Nothing }
             else state { message = "No puedes modificar esta casilla." }
 
+generateNewGame :: GameState -> IO GameState
+generateNewGame state = do
+    newBoard <- generateNewBoard
+    return state
+        { board = newBoard
+        , initialBoard = newBoard
+        , message = "Nuevo tablero generado"
+        }
 
-
-
+isValidCurrentState :: Board -> (Int, Int) -> Bool
+isValidCurrentState board (x, y) =
+    case board !! y !! x of
+        Nothing -> True -- Si la celda está vacía, es válida
+        Just val ->
+            let -- Filtra los valores de la fila y la columna excluyendo la celda actual
+                rowValues = [v | (col, Just v) <- zip [0..] (board !! y), col /= x]
+                colValues = [v | (row, Just v) <- zip [0..] (map (!! x) board), row /= y]
+            in notElem val rowValues && notElem val colValues
