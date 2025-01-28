@@ -2,9 +2,12 @@
 module Logic.CSP where
 
 import Common (GameState(..), Board)
-import Data.List (minimumBy)
+import Data.List (minimumBy,sortBy)
 import Data.Ord (comparing)
 import Data.Maybe (isJust)
+import System.Random (randomRIO)
+import Control.Applicative ((<|>))
+
 
 -- type Board = [[Maybe Int]]
 type Domain = [Int]
@@ -74,19 +77,46 @@ solveCSP csp
     selectUnassigned :: CSP -> Maybe (Int, Int)
     selectUnassigned csp =
         let candidates = [(row, col) | row <- [0..8], col <- [0..8], length (csp !! row !! col) > 1]
-        in if null candidates then Nothing else Just (head candidates)
+        in if null candidates
+            then Nothing
+            else Just (minimumBy (comparing (\(r, c) -> length (csp !! r !! c))) candidates)
+
 
     tryValues :: CSP -> Int -> Int -> [Int] -> Maybe Board
-    tryValues csp row col [] = Nothing -- Sin valores posibles
-    tryValues csp row col (v:vs) =
-        let newCSP = assignValue csp row col v
-        in case solveCSP (ac3 newCSP) of
-            Just solution -> Just solution
-            Nothing -> tryValues csp row col vs
+    tryValues csp row col values =
+        let orderedValues = sortBy (comparing (constraints csp row col)) values
+        in tryValuesOrdered csp row col orderedValues
+        where
+        tryValuesOrdered :: CSP -> Int -> Int -> [Int] -> Maybe Board
+        tryValuesOrdered _ _ _ [] = Nothing
+        tryValuesOrdered csp row col (v:vs) =
+            case assignValue csp row col v of
+                Nothing -> tryValuesOrdered csp row col vs -- Si falla, intenta el siguiente valor
+                Just newCSP ->
+                    let propagatedCSP = ac3 newCSP
+                    in if not (isCSPValid propagatedCSP)
+                        then tryValuesOrdered csp row col vs -- Retrocede si el CSP es inválido
+                        else solveCSP propagatedCSP <|> tryValuesOrdered csp row col vs
 
-    assignValue :: CSP -> Int -> Int -> Int -> CSP
+        constraints :: CSP -> Int -> Int -> Int -> Int
+        constraints csp row col value =
+            length [() | (r, c) <- affectedCells row col,
+                        value `elem` (csp !! r !! c)]
+
+        affectedCells r c =
+            [(r', c') | r' <- [0..8], c' <- [0..8],
+                        (r' == r || c' == c || inSameSubGrid (r, c) (r', c')) &&
+                        (r', c') /= (r, c)]
+
+
+    assignValue :: CSP -> Int -> Int -> Int -> Maybe CSP
     assignValue csp row col value =
-        replaceAt csp row col [value]
+        let updatedCSP = replaceAt csp row col [value]
+        in if any (any null) updatedCSP
+            then Nothing -- Devuelve Nothing si algún dominio queda vacío
+            else Just updatedCSP
+
+
 
     cspToBoard :: CSP -> Board
     cspToBoard csp = map (map toMaybe) csp
@@ -113,21 +143,19 @@ nodeConsistency csp =
 ac3Dynamic :: CSP -> CSP
 ac3Dynamic csp = ac3' csp initialQueue
   where
-    initialQueue = [(r, c, r', c') | r <- [0..8], c <- [0..8],
-                                     r' <- [0..8], c' <- [0..8],
-                                     (r /= r' || c /= c') &&
-                                     (r == r' || c == c' || inSameSubGrid (r, c) (r', c'))]
+    initialQueue = uniqueConstraints [(r, c, r', c') | r <- [0..8], c <- [0..8],
+                                                       r' <- [0..8], c' <- [0..8],
+                                                       (r /= r' || c /= c') &&
+                                                       (r == r' || c == c' || inSameSubGrid (r, c) (r', c'))]
 
-    inSameSubGrid (r1, c1) (r2, c2) =
-        (r1 `div` 3 == r2 `div` 3) && (c1 `div` 3 == c2 `div` 3)
-
-    ac3' :: CSP -> [(Int, Int, Int, Int)] -> CSP
     ac3' csp [] = csp
     ac3' csp ((r1, c1, r2, c2):queue) =
         let (newCSP, changed) = revise csp (r1, c1) (r2, c2)
         in if changed
-            then ac3' newCSP (queue ++ [(r, c, r1, c1) | (r, c) <- neighbors (r1, c1), (r, c) /= (r2, c2)])
+            then ac3' newCSP (uniqueConstraints (queue ++ [(r, c, r1, c1) | (r, c) <- neighbors (r1, c1), (r, c) /= (r2, c2)]))
             else ac3' csp queue
+
+    uniqueConstraints = foldr (\x acc -> if x `elem` acc then acc else x : acc) []
 
 
     revise :: CSP -> (Int, Int) -> (Int, Int) -> (CSP, Bool)
@@ -163,3 +191,9 @@ eliminate csp (row, col) value =
         in if value `elem` currentDomain
             then replaceAt csp r c (filter (/= value) currentDomain)
             else csp
+
+inSameSubGrid (r1, c1) (r2, c2) =
+        (r1 `div` 3 == r2 `div` 3) && (c1 `div` 3 == c2 `div` 3)
+
+isCSPValid :: CSP -> Bool
+isCSPValid = all (all (not . null)) -- Verifica que no haya dominios vacíos
