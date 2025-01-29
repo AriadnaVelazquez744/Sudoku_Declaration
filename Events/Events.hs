@@ -68,25 +68,10 @@ handleRulesScreen _ state = state
 
 handleEndScreen :: Event -> GameState -> GameState
 handleEndScreen (EventKey (MouseButton LeftButton) Down _ (mx, my)) state
-    | isButtonClicked mx my (-570) (-150) = state { screen = StartScreen }
+    | isButtonClicked mx my (-570) (-150) = unsafePerformIO $ generateNewGame state { screen = StartScreen }
     | isButtonClicked mx my (-570) (150) = unsafePerformIO $ generateNewGame state { screen = GameScreen }
     | otherwise = state
 handleEndScreen _ state = state
-
--- autoSolve :: GameState -> IO GameState
--- autoSolve state = do
---     solutionSteps <- generateSolutionSteps state
---     let newBoard = applySolutionSteps (board state) solutionSteps
---     return state { board = newBoard, message = "Sudoku resuelto automáticamente." }
-
--- -- Aplica los pasos generados al tablero
--- applySolutionSteps :: Board -> [(Int, Int, Int)] -> Board
--- applySolutionSteps board steps =
---     foldl (\b (r, c, v) -> updateBoard b r c (Just v)) board steps
-
-
--- stopAutoSolve :: GameState -> GameState
--- stopAutoSolve state = state { autoSolveRunning = False, message = "Autosolver detenido." }
 
 checkWinCondition :: GameState -> GameState
 checkWinCondition state =
