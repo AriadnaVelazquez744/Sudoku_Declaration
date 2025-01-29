@@ -66,3 +66,15 @@ styledText scaleSize scaleThickness textColor txt =
 isButtonClicked :: Float -> Float -> Float -> Float -> Bool
 isButtonClicked mx my bx by =
     mx >= bx - 100 && mx <= bx + 100 && my >= by - 25 && my <= by + 25
+
+-- Función para dividir un mensaje en líneas que no excedan un ancho máximo
+splitMessage :: Float -> Float -> String -> [String]
+splitMessage maxWidth charWidth msg = go (words msg) []
+  where
+    go [] acc = reverse acc
+    go (w:ws) [] = go ws [w]
+    go (w:ws) (l:ls)
+      | lineWidth (l ++ " " ++ w) <= maxWidth = go ws ((l ++ " " ++ w) : ls)
+      | otherwise = go ws (w : l : ls)
+    
+    lineWidth line = fromIntegral (length line) * charWidth

@@ -29,8 +29,7 @@ handleGameScreen (EventKey (MouseButton LeftButton) Down _ (mx, my)) state
     | isButtonClicked mx my (-575) (300) = state { screen = StartScreen } -- Botón "Volver a Inicio"
     | isButtonClicked mx my (-575) (200) = unsafePerformIO $ generateNewGame state                
     | isButtonClicked mx my (-575) (100) = resetGame state              
-    | isButtonClicked mx my (-575) (0)  = solveSudoku state               -- Botón Autosolver
-    | isButtonClicked mx my (-575) (-100) = stopAutoSolve state              -- Parar Autosolver
+    | isButtonClicked mx my (-575) (0)  = solveSudoku state  -- Botón Autosolver
     | -- Verifica si el clic es en una celda del tablero
       isCellClicked mx my = selectCell mx my state
     -- Si no, maneja clics generales en el tablero
@@ -86,8 +85,8 @@ handleEndScreen _ state = state
 --     foldl (\b (r, c, v) -> updateBoard b r c (Just v)) board steps
 
 
-stopAutoSolve :: GameState -> GameState
-stopAutoSolve state = state { autoSolveRunning = False, message = "Autosolver detenido." }
+-- stopAutoSolve :: GameState -> GameState
+-- stopAutoSolve state = state { autoSolveRunning = False, message = "Autosolver detenido." }
 
 checkWinCondition :: GameState -> GameState
 checkWinCondition state =
@@ -98,8 +97,8 @@ checkWinCondition state =
 solveSudoku :: GameState -> GameState
 solveSudoku state =
     case solveBoardWithCSP (board state) of
-        Just solvedBoard -> state { board = solvedBoard, message = "Sudoku resuelto automáticamente." }
-        Nothing          -> state { message = "No se encontró solución para este tablero." }
+        Just solvedBoard -> state { board = solvedBoard, message = "Sudoku automatically resolved." }
+        Nothing          -> state { message = "Solution not found for this board." }
 
 
 
