@@ -22,13 +22,12 @@ insertValue val state =
         initial = initialBoard state !! y !! x
         currentBoard = board state
     in if initial /= Nothing
-        then state { message = "No puedes modificar esta casilla." } -- Celda protegida
+        then state { message = "You cannot modify this cell." } -- Celda protegida
         else
             let newBoard = updateBoard currentBoard x y (Just val)
             in if isValidCurrentState newBoard (x, y)
                 then state { board = newBoard, message = "" } -- Movimiento válido, limpia mensaje
-                else state { message = "Movimiento inválido: el número ya existe en la fila o columna." } -- Movimiento inválido
-
+                else state { message = "Invalid Move: Number " ++ show val ++ " already in column, row or block." } -- Movimiento inválido
 
 screenToCell :: Float -> Float -> (Int, Int)
 screenToCell mx my = (floor (mx / cellSize), floor (-my / cellSize))
@@ -78,7 +77,7 @@ deleteValue state =
         current = board state !! y !! x
     in if initial == Nothing && current /= Nothing -- Solo elimina si no es parte del tablero inicial y hay un valor
             then state { board = updateBoard (board state) x y Nothing }
-            else state { message = "No puedes modificar esta casilla." }
+            else state { message = "You cannot modify this cell." }
 
 generateNewGame :: GameState -> IO GameState
 generateNewGame state = do
@@ -86,7 +85,7 @@ generateNewGame state = do
     return state
         { board = newBoard
         , initialBoard = newBoard
-        , message = "Nuevo tablero generado"
+        , message = "New board generated"
         }
 
 isValidCurrentState :: Board -> (Int, Int) -> Bool

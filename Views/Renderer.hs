@@ -3,7 +3,7 @@ module Views.Renderer where
 import Graphics.Gloss
 import Common
 import Views.Board (drawBoardWithGrid)
-import Views.UI (drawButton, styledText, ButtonConfig(..))
+import Views.UI (drawButton, styledText, ButtonConfig(..), splitMessage)
 
 -- Renderiza la pantalla según el estado actual.
 render :: GameState -> Picture
@@ -47,8 +47,7 @@ drawGameScreen state =
         drawButton gameButtonConfig (-575) (300) "Back" False,
         drawButton gameButtonConfig (-575) (200) "New Game  " False,
         drawButton gameButtonConfig (-575) (100) "Clear Board" False,
-        drawButton gameButtonConfig (-575) (0) " AutoSolve " False,
-        drawButton gameButtonConfig (-575) (-100) " Stop Solving " False
+        drawButton gameButtonConfig (-575) (0) " AutoSolve " False
       ]
 
 -- Pantalla de fin del juego
@@ -74,7 +73,7 @@ drawCreditsScreen state =
         translate (-750) 130 $ styledText 0.20 0.5 black "Created by MATCOM's third year students as part of the Declarative Programming subject.",
         translate (-700) 30 $ styledText 0.20 0.6 black "The authors are: ",
         translate (-700) (-20) $ styledText 0.18 0.5 black "Ariadna Velazquez Rey  C311 ",
-        translate (-700) (-60) $ styledText 0.18 0.5 black "Lia Stephany Lopez Rozales  C312 ",
+        translate (-700) (-60) $ styledText 0.18 0.5 black "Lia Stephanie Lopez Rosales  C312 ",
         translate (-700) (-100) $ styledText 0.18 0.5 black "Raidel Miguel Cabellud Lizaso   C311 ",
         drawButton gameButtonConfig (0) (-290) "Back" False
       ]
@@ -107,7 +106,18 @@ drawMessage x y scaleSize color message =
 
 -- Usar esta función para colocar un mensaje en la pantalla de juego
 gameMessage :: String -> Picture
-gameMessage msg = drawMessage (-750) (-250) 0.3 red msg
+gameMessage msg = 
+    let maxWidth = 300  -- Ancho máximo permitido para el mensaje
+        charWidth = 10  -- Ancho aproximado de cada carácter
+        lines = splitMessage maxWidth charWidth msg
+        lineHeight = 30 -- Espacio entre líneas
+        xInicial = -795 -- Posición horizontal inicial
+        anchoDisponible = 350 -- Ancho del espacio disponible
+    in pictures $ zipWith (\i line -> 
+            let anchoTexto = fromIntegral (length line) * charWidth
+                xCentered = xInicial + (anchoDisponible - anchoTexto) / 2
+            in drawMessage xCentered (-200 - i * lineHeight) 0.22 red line
+        ) [0..] lines
 
 creditsMessage :: String -> Picture
 creditsMessage msg = drawMessage (-750) (-250) 0.3 darkViolet msg
