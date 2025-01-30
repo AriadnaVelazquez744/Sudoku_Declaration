@@ -30,6 +30,10 @@ handleGameScreen (EventKey (MouseButton LeftButton) Down _ (mx, my)) state
     | isButtonClicked mx my (-575) (200) = unsafePerformIO $ generateNewGame state                
     | isButtonClicked mx my (-575) (100) = resetGame state              
     | isButtonClicked mx my (-575) (0)  = solveSudoku state  -- Botón Autosolver
+    | isButtonClicked mx my (-575) (-100) =
+        if isBoardComplete (board state)
+            then state { screen = EndScreen } -- Si el tablero está lleno, cambia a EndScreen
+            else state 
     | -- Verifica si el clic es en una celda del tablero
       isCellClicked mx my = selectCell mx my state
     -- Si no, maneja clics generales en el tablero

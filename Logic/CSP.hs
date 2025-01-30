@@ -4,7 +4,7 @@ module Logic.CSP where
 import Common (GameState(..), Board)
 import Data.List (minimumBy,sortBy)
 import Data.Ord (comparing)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust,listToMaybe)
 import System.Random (randomRIO)
 import Control.Applicative ((<|>))
 
