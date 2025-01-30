@@ -83,6 +83,7 @@ shuffle xs = do
     rest <- shuffle (before ++ after)
     return (x : rest)
 
+-- Comprueba solución válida
 isWinCondition :: Board -> Bool
 isWinCondition board =
     isBoardComplete board && -- Verifica que el tablero esté lleno
@@ -114,10 +115,6 @@ applyTemplate board plantilla =
         | keep      = cell   -- Si el valor en la plantilla es True, conserva la celda.
         | otherwise = Nothing -- Si es False, elimina el valor.
 
--- -- Función para generar un tablero de Sudoku aleatorio
--- generateRandomSudoku :: IO (Maybe Board)
--- generateRandomSudoku = do
---   solveSudoku emptyBoard
 
 --Plantillas para generar diferentes tipos de sudoku
 plantilla_1 = [[True, False, False, False, False, True, False, True, False],

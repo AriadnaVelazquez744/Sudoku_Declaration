@@ -96,4 +96,13 @@ isValidCurrentState board (x, y) =
             let -- Filtra los valores de la fila y la columna excluyendo la celda actual
                 rowValues = [v | (col, Just v) <- zip [0..] (board !! y), col /= x]
                 colValues = [v | (row, Just v) <- zip [0..] (map (!! x) board), row /= y]
-            in notElem val rowValues && notElem val colValues
+                -- Filtra los valores dentro del bloque 3x3 correspondiente
+                blockValues = [v | (bx, by) <- getBlockCells (x, y), Just v <- [board !! by !! bx], (bx, by) /= (x, y)]
+            in notElem val rowValues && notElem val colValues && notElem val blockValues
+
+-- Función auxiliar para obtener todas las celdas del bloque 3x3 al que pertenece (x, y)
+getBlockCells :: (Int, Int) -> [(Int, Int)]
+getBlockCells (x, y) =
+    let blockStartX = (x `div` 3) * 3
+        blockStartY = (y `div` 3) * 3
+    in [(bx, by) | bx <- [blockStartX .. blockStartX + 2], by <- [blockStartY .. blockStartY + 2]]
