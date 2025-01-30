@@ -73,21 +73,6 @@ handleEndScreen (EventKey (MouseButton LeftButton) Down _ (mx, my)) state
     | otherwise = state
 handleEndScreen _ state = state
 
--- autoSolve :: GameState -> IO GameState
--- autoSolve state = do
---     solutionSteps <- generateSolutionSteps state
---     let newBoard = applySolutionSteps (board state) solutionSteps
---     return state { board = newBoard, message = "Sudoku resuelto automáticamente." }
-
--- -- Aplica los pasos generados al tablero
--- applySolutionSteps :: Board -> [(Int, Int, Int)] -> Board
--- applySolutionSteps board steps =
---     foldl (\b (r, c, v) -> updateBoard b r c (Just v)) board steps
-
-
--- stopAutoSolve :: GameState -> GameState
--- stopAutoSolve state = state { autoSolveRunning = False, message = "Autosolver detenido." }
-
 checkWinCondition :: GameState -> GameState
 checkWinCondition state =
     if isWinCondition (board state)
@@ -99,9 +84,6 @@ solveSudoku state =
     case solveBoardWithCSP (board state) of
         Just solvedBoard -> state { board = solvedBoard, message = "Sudoku automatically resolved." }
         Nothing          -> state { message = "Solution not found for this board." }
-
-
-
 
 
 

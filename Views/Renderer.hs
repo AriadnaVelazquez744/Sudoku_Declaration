@@ -47,7 +47,8 @@ drawGameScreen state =
         drawButton gameButtonConfig (-575) (300) "Back" False,
         drawButton gameButtonConfig (-575) (200) "New Game  " False,
         drawButton gameButtonConfig (-575) (100) "Clear Board" False,
-        drawButton gameButtonConfig (-575) (0) " AutoSolve " False
+        drawButton gameButtonConfig (-575) (0) " AutoSolve " False,
+        drawButton gameButtonConfig (-575) (-100) "  Continue..." False
       ]
 
 -- Pantalla de fin del juego
@@ -116,7 +117,7 @@ gameMessage msg =
     in pictures $ zipWith (\i line -> 
             let anchoTexto = fromIntegral (length line) * charWidth
                 xCentered = xInicial + (anchoDisponible - anchoTexto) / 2
-            in drawMessage xCentered (-200 - i * lineHeight) 0.22 red line
+            in drawMessage xCentered (-300 - i * lineHeight) 0.22 red line
         ) [0..] lines
 
 creditsMessage :: String -> Picture
