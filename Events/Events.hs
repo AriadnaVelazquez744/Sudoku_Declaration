@@ -68,7 +68,7 @@ handleRulesScreen _ state = state
 
 handleEndScreen :: Event -> GameState -> GameState
 handleEndScreen (EventKey (MouseButton LeftButton) Down _ (mx, my)) state
-    | isButtonClicked mx my (-570) (-150) = state { screen = StartScreen }
+    | isButtonClicked mx my (-570) (-150) = unsafePerformIO $ generateNewGame state { screen = StartScreen }
     | isButtonClicked mx my (-570) (150) = unsafePerformIO $ generateNewGame state { screen = GameScreen }
     | otherwise = state
 handleEndScreen _ state = state
