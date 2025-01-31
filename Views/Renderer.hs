@@ -48,7 +48,7 @@ drawGameScreen state =
         drawButton gameButtonConfig (-575) (200) "New Game  " False,
         drawButton gameButtonConfig (-575) (100) "Clear Board" False,
         drawButton gameButtonConfig (-575) (0) " AutoSolve " False,
-        drawButton gameButtonConfig (-575) (-100) "  Continue..." False
+        drawButton gameButtonConfig (-575) (-100) " Continue..." False
       ]
 
 -- Pantalla de fin del juego
