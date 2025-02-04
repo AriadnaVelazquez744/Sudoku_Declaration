@@ -1,11 +1,11 @@
 module Events.Events where
 
-import Common 
+import Common.Types 
 import Graphics.Gloss.Interface.Pure.Game
 import Events.EventHelpers
 import Logic.CSP (solveBoardWithCSP)
 import System.IO.Unsafe (unsafePerformIO)
-import Logic.Logic (generateNewBoard, isBoardComplete, isWinCondition, isValidMove)
+import Logic.GameLogic (generateNewBoard, isBoardComplete, isWinCondition, isValidMove)
 
 
 handleEvent :: Event -> GameState -> GameState

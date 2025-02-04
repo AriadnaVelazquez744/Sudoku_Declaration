@@ -1,7 +1,7 @@
 module Views.Renderer where
 
 import Graphics.Gloss
-import Common
+import Common.Types
 import Views.Board (drawBoardWithGrid)
 import Views.UI (drawButton, styledText, ButtonConfig(..), splitMessage)
 

@@ -1,4 +1,4 @@
-module Logic.Logic where
+module Logic.GameLogic where
 
 import System.Random (randomRIO)
 import Data.List (nub)

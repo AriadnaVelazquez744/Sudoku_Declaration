@@ -1,7 +1,7 @@
 
 module Logic.CSP where
 
-import Common (GameState(..), Board)
+import Common.Types (GameState(..), Board)
 import Data.List (minimumBy,sortBy)
 import Data.Ord (comparing)
 import Data.Maybe (isJust,listToMaybe)

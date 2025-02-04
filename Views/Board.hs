@@ -1,7 +1,7 @@
 module Views.Board where
 
 import Graphics.Gloss
-import Common
+import Common.Types
 
 -- Usa esta función junto al tablero.
 drawBoardWithGrid :: Board -> Board -> (Int, Int) -> Float -> Float -> Float -> Picture

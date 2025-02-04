@@ -1,8 +1,8 @@
 module Events.EventHelpers where
 
 import Graphics.Gloss.Interface.Pure.Game
-import Common
-import Logic.Logic (generateNewBoard, isBoardComplete, isWinCondition, isValidMove)
+import Common.Types
+import Logic.GameLogic (generateNewBoard, isBoardComplete, isWinCondition, isValidMove)
 import System.IO.Unsafe (unsafePerformIO)
 
 handleBoardClick :: Float -> Float -> GameState -> GameState
