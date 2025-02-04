@@ -137,11 +137,11 @@ main = do
 
 🔹 **Change colors**: Modify `Graphics.Board.hs` in `cellStyle`.\
 🔹 **Change font and number style**: Modify `drawValue` in `Graphics.UI.hs`.\
-🔹 **Add more screens**: Use `Graphics.Renderer.hs` to manage screen transitions.
-🔹 Ensure required images are placed in the `Img/` folder (e.g., `"title.bmp"`).
+🔹 **Add more screens**: Use `Graphics.Renderer.hs` to manage screen transitions.\
+🔹 Ensure required images are placed in the `Img/` folder (e.g., `"title.bmp"`).\
 
 ---
 
 ## ✨ **Author**
 
-Developed by **[Ariadna Velázquez and Lía Lopez]** as part of a **Declarative Programming in Haskell** project.
+Developed by **[Ariadna Velázquez and Lía Lopez]** as part of a **Declarative Programming** project.
